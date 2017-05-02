@@ -17,4 +17,28 @@ public class Assignment {
   public int getValue() {
     return value;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    Assignment that = (Assignment) o;
+
+    if (value != that.value) {
+      return false;
+    }
+    return variable.equals(that.variable);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = variable.hashCode();
+    result = 31 * result + value;
+    return result;
+  }
 }

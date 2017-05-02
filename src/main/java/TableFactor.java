@@ -1,4 +1,6 @@
 import com.google.common.base.Preconditions;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,5 +28,21 @@ public class TableFactor implements Factor {
   public double evaluate(Set<Assignment> assignment) {
     Preconditions.checkArgument(assignment.stream().map(Assignment::getVariable).collect(Collectors.toSet()).equals(scope), "Must evaluate on full scope");
     return table.get(assignment);
+  }
+
+  public TableFactor marginalizeOut(DiscreteVariable variable) {
+    Map<Set<Assignment>, Double> results = new HashMap<>();
+    for (Set<Assignment> assignments : table.keySet()) {
+      Set<Assignment> otherAssignments = new HashSet<>();
+      for (Assignment assignment : assignments) {
+        if (!assignment.getVariable().equals(variable)) {
+          otherAssignments.add(assignment);
+        }
+      }
+
+      final Double priorValue = results.get(otherAssignments);
+      results.put(otherAssignments, ((priorValue == null) ? 0 : priorValue) + table.get(assignments));
+    }
+    return new TableFactor(results);
   }
 }
