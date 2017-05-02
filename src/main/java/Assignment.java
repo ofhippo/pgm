@@ -5,7 +5,7 @@ public class Assignment {
   private final int value;
 
   public Assignment(RandomVariable variable, int value) {
-    Preconditions.checkArgument(variable.isValidAssignment(value));
+    Preconditions.checkArgument(variable.isValidAssignment(value), "invalid assignment: " + value);
     this.variable = variable;
     this.value = value;
   }
