@@ -1,4 +1,5 @@
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -44,5 +45,45 @@ public class TableFactor implements Factor {
       results.put(otherAssignments, ((priorValue == null) ? 0 : priorValue) + table.get(assignments));
     }
     return new TableFactor(results);
+  }
+
+  public TableFactor product(TableFactor other) {
+    Map<Set<Assignment>, Double> results = new HashMap<>();
+    Set<RandomVariable> variableIntersection = Sets.intersection(this.scope, other.scope);
+    for (Set<Assignment> myAssignments : this.table.keySet()) {
+      final Set<Assignment> relevantAssignments = myAssignments.stream()
+          .filter(assignment -> variableIntersection.contains(assignment.getVariable())).collect(
+              Collectors.toSet());
+      for (Set<Assignment> theirAssignments : other.table.keySet()) {
+        if (theirAssignments.containsAll(relevantAssignments)) {
+          results.put(Sets.union(myAssignments, theirAssignments), this.evaluate(myAssignments) * other.evaluate(theirAssignments));
+        }
+      }
+    }
+    return new TableFactor(results);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    TableFactor that = (TableFactor) o;
+
+    if (!table.equals(that.table)) {
+      return false;
+    }
+    return scope != null ? scope.equals(that.scope) : that.scope == null;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = table.hashCode();
+    result = 31 * result + (scope != null ? scope.hashCode() : 0);
+    return result;
   }
 }
