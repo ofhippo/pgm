@@ -80,6 +80,31 @@ public class TableFactor implements Factor {
     return scope != null ? scope.equals(that.scope) : that.scope == null;
   }
 
+  public boolean equals(Object o, double epsilon) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    TableFactor that = (TableFactor) o;
+
+    if (!table.keySet().equals(that.table.keySet())) {
+      return false;
+    }
+
+    for (Set<Assignment> assignments : table.keySet()) {
+      if (!that.table.keySet().contains(assignments)) {
+        return false;
+      }
+      if (Math.abs(table.get(assignments) - that.table.get(assignments)) > epsilon) {
+        return false;
+      }
+    }
+    return scope != null ? scope.equals(that.scope) : that.scope == null;
+  }
+
   @Override
   public int hashCode() {
     int result = table.hashCode();

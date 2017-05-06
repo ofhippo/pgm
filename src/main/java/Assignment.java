@@ -5,7 +5,7 @@ public class Assignment {
   private final int value;
 
   public Assignment(RandomVariable variable, int value) {
-    Preconditions.checkArgument(variable.isValidAssignment(value), "invalid assignment: " + value);
+    Preconditions.checkArgument(variable.isValidAssignment(value), "invalid assignment: " + value + " to variable: " + variable.getName());
     this.variable = variable;
     this.value = value;
   }
@@ -40,5 +40,10 @@ public class Assignment {
     int result = variable.hashCode();
     result = 31 * result + value;
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return "(" + variable.getName() + "=" + value + ")";
   }
 }

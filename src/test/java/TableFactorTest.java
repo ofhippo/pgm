@@ -1,6 +1,7 @@
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.util.HashMap;
@@ -14,10 +15,15 @@ public class TableFactorTest {
   private DiscreteVariable x = new DiscreteVariable(2, "X");
   private DiscreteVariable y = new DiscreteVariable(2, "Y");
   private DiscreteVariable z = new DiscreteVariable(3, "Z");
+  private DiscreteVariable a = new DiscreteVariable(4, "A"); //lazy 1-index
+  private DiscreteVariable b = new DiscreteVariable(3, "B"); //lazy 1-index
+  private DiscreteVariable c = new DiscreteVariable(3, "C"); //lazy 1-index
   private TableFactor xor;
   private TableFactor xPlusTenY;
   private TableFactor multiplied;
   private TableFactor zMinusX;
+  private TableFactor figureFourThreeA;
+  private TableFactor figureFourThreeB;
 
   @Before
   public void setup() {
@@ -62,6 +68,26 @@ public class TableFactorTest {
       }
     }
     this.zMinusX = new TableFactor(zMinusX);
+
+    figureFourThreeA = new TableFactor(
+        ImmutableMap.<Set<Assignment>, Double>builder()
+          .put(ImmutableSet.of(new Assignment(a, 1), new Assignment(b, 1)), 0.5)
+          .put(ImmutableSet.of(new Assignment(a, 1), new Assignment(b, 2)), 0.8)
+          .put(ImmutableSet.of(new Assignment(a, 2), new Assignment(b, 1)), 0.1)
+          .put(ImmutableSet.of(new Assignment(a, 2), new Assignment(b, 2)), 0.0)
+          .put(ImmutableSet.of(new Assignment(a, 3), new Assignment(b, 1)), 0.3)
+          .put(ImmutableSet.of(new Assignment(a, 3), new Assignment(b, 2)), 0.9)
+        .build()
+    );
+
+    figureFourThreeB = new TableFactor(
+        ImmutableMap.<Set<Assignment>, Double>builder()
+            .put(ImmutableSet.of(new Assignment(b, 1), new Assignment(c, 1)), 0.5)
+            .put(ImmutableSet.of(new Assignment(b, 1), new Assignment(c, 2)), 0.7)
+            .put(ImmutableSet.of(new Assignment(b, 2), new Assignment(c, 1)), 0.1)
+            .put(ImmutableSet.of(new Assignment(b, 2), new Assignment(c, 2)), 0.2)
+            .build()
+    );
   }
 
   @Test
@@ -128,5 +154,26 @@ public class TableFactorTest {
     assertThat(product.evaluate(ImmutableSet.of(new Assignment(x, 0), new Assignment(y, 0), new Assignment(z, 1)))).isEqualTo(0d);
     assertThat(product.evaluate(ImmutableSet.of(new Assignment(x, 1), new Assignment(y, 0), new Assignment(z, 0)))).isEqualTo(-1d);
     assertThat(product.evaluate(ImmutableSet.of(new Assignment(x, 1), new Assignment(y, 1), new Assignment(z, 0)))).isEqualTo(-11d);
+
+    TableFactor figureFourThreeProduct = new TableFactor(
+        ImmutableMap.<Set<Assignment>, Double>builder()
+            .put(ImmutableSet.of(new Assignment(a, 1), new Assignment(b, 1), new Assignment(c, 1)), 0.25)
+            .put(ImmutableSet.of(new Assignment(a, 1), new Assignment(b, 1), new Assignment(c, 2)), 0.35)
+            .put(ImmutableSet.of(new Assignment(a, 1), new Assignment(b, 2), new Assignment(c, 1)), 0.08)
+            .put(ImmutableSet.of(new Assignment(a, 1), new Assignment(b, 2), new Assignment(c, 2)), 0.16)
+            .put(ImmutableSet.of(new Assignment(a, 2), new Assignment(b, 1), new Assignment(c, 1)), 0.05)
+            .put(ImmutableSet.of(new Assignment(a, 2), new Assignment(b, 1), new Assignment(c, 2)), 0.07)
+            .put(ImmutableSet.of(new Assignment(a, 2), new Assignment(b, 2), new Assignment(c, 1)), 0.0)
+            .put(ImmutableSet.of(new Assignment(a, 2), new Assignment(b, 2), new Assignment(c, 2)), 0.0)
+            .put(ImmutableSet.of(new Assignment(a, 3), new Assignment(b, 1), new Assignment(c, 1)), 0.15)
+            .put(ImmutableSet.of(new Assignment(a, 3), new Assignment(b, 1), new Assignment(c, 2)), 0.21)
+            .put(ImmutableSet.of(new Assignment(a, 3), new Assignment(b, 2), new Assignment(c, 1)), 0.09)
+            .put(ImmutableSet.of(new Assignment(a, 3), new Assignment(b, 2), new Assignment(c, 2)), 0.18)
+            .build()
+    );
+
+    // Koller page 107
+    assertThat(figureFourThreeA.product(figureFourThreeB).equals(figureFourThreeProduct, 1e-6)).isTrue();
+    assertThat(figureFourThreeB.product(figureFourThreeA).equals(figureFourThreeProduct, 1e-6)).isTrue();
   }
 }
