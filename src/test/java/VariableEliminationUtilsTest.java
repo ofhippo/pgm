@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.assertj.core.api.IterableAssert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -80,46 +81,31 @@ public class VariableEliminationUtilsTest {
 
   @Test
   public void sumProductVariableElimination() throws Exception {
-    final ImmutableSet<TableFactor> allFactors = ImmutableSet
+    final ImmutableSet<TableFactor> factors = ImmutableSet
         .of(xor, figureFourThreeA, figureFourThreeB, xPlusTenY, zMinusX);
 
-    assertThat(VariableEliminationUtils.sumProductVariableElimination(
-        allFactors,
-        ImmutableList.of()).scope).isEqualTo(ImmutableSet.of(a, b, c, x, y, z));
-
-    assertThat(VariableEliminationUtils.sumProductVariableElimination(
-        allFactors,
-        ImmutableList.of(z)).scope).isEqualTo(ImmutableSet.of(a, b, c, x, y));
-
-    assertThat(VariableEliminationUtils.sumProductVariableElimination(
-        allFactors,
-        ImmutableList.of(z, x)).scope).isEqualTo(ImmutableSet.of(a, b, c, y));
-
-    assertThat(VariableEliminationUtils.sumProductVariableElimination(
-        allFactors,
-        ImmutableList.of(b, z, x)).scope).isEqualTo(ImmutableSet.of(a, c, y));
-
-    assertThat(VariableEliminationUtils.sumProductVariableElimination(
-        allFactors,
-        ImmutableList.of(b, z, x)).scope).isEqualTo(ImmutableSet.of(a, y, c));
-
-    assertThat(VariableEliminationUtils.sumProductVariableElimination(
-        allFactors,
-        ImmutableList.of(b, z, x)).scope).isEqualTo(ImmutableSet.of(c, a, y));
-
-    assertThat(VariableEliminationUtils.sumProductVariableElimination(
-        allFactors,
-        ImmutableList.of(b, a, z, x)).scope).isEqualTo(ImmutableSet.of(c, y));
-
-    assertThat(VariableEliminationUtils.sumProductVariableElimination(
-        allFactors,
-        ImmutableList.of(b, a, y, z, x)).scope).isEqualTo(ImmutableSet.of(c));
-
-    assertThat(VariableEliminationUtils.sumProductVariableElimination(
-        allFactors,
-        ImmutableList.of(b, a, y, z, x, c)).scope).isEqualTo(ImmutableSet.of());
+    assertVariableEliminationScope(factors, ImmutableList.of(), ImmutableSet.of(a, b, c, x, y, z));
+    assertVariableEliminationScope(factors, ImmutableList.of(z), ImmutableSet.of(a, b, c, x, y));
+    assertVariableEliminationScope(factors, ImmutableList.of(z, x), ImmutableSet.of(a, b, c, y));
+    assertVariableEliminationScope(factors, ImmutableList.of(b, z, x), ImmutableSet.of(a, c, y));
+    assertVariableEliminationScope(factors, ImmutableList.of(b, x, z), ImmutableSet.of(a, c, y));
+    assertVariableEliminationScope(factors, ImmutableList.of(x, z, b), ImmutableSet.of(a, c, y));
+    assertVariableEliminationScope(factors, ImmutableList.of(x, b, z), ImmutableSet.of(a, c, y));
+    assertVariableEliminationScope(factors, ImmutableList.of(z, b, x), ImmutableSet.of(a, c, y));
+    assertVariableEliminationScope(factors, ImmutableList.of(z, x, b), ImmutableSet.of(a, c, y));
+    assertVariableEliminationScope(factors, ImmutableList.of(b, a, z, x), ImmutableSet.of(c, y));
+    assertVariableEliminationScope(factors, ImmutableList.of(b, a, y, z, x), ImmutableSet.of(c));
+    assertVariableEliminationScope(factors, ImmutableList.of(b, a, y, z, x, c), ImmutableSet.of());
 
     //TODO Test more than scope
+  }
+
+  private IterableAssert<RandomVariable> assertVariableEliminationScope(ImmutableSet<TableFactor> factors,
+      ImmutableList<DiscreteVariable> variablesToEliminate,
+      ImmutableSet<DiscreteVariable> expectedScope) {
+    return assertThat(VariableEliminationUtils.sumProductVariableElimination(
+        factors,
+        variablesToEliminate).scope).isEqualTo(expectedScope);
   }
 
 }
