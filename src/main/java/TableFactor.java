@@ -1,7 +1,9 @@
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -61,6 +63,21 @@ public class TableFactor implements Factor {
       }
     }
     return new TableFactor(results);
+  }
+
+  static TableFactor product(Set<TableFactor> factorsOriginal) {
+    List<TableFactor> factors = new ArrayList<>(factorsOriginal);
+    if (factors.size() == 0) {
+      throw new IllegalArgumentException("Can't product nothin'");
+    }
+
+    if (factors.size() == 1) {
+      return factors.get(0);
+    } else {
+      final List<TableFactor> results = factors.subList(2, factors.size());
+      results.add(factors.get(0).product(factors.get(1)));
+      return product(new HashSet(results));
+    }
   }
 
   public TableFactor reduce(Assignment assignment) {

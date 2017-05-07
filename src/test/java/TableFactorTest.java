@@ -1,6 +1,7 @@
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -176,6 +177,9 @@ public class TableFactorTest {
     // Koller page 107
     assertThat(figureFourThreeA.product(figureFourThreeB).equals(figureFourThreeProduct, EPSILON)).isTrue();
     assertThat(figureFourThreeB.product(figureFourThreeA).equals(figureFourThreeProduct, EPSILON)).isTrue();
+    assertThat(TableFactor.product(
+        ImmutableList.of(figureFourThreeA, figureFourThreeB)).equals(figureFourThreeProduct, EPSILON)).isTrue();
+
   }
 
   @Test
