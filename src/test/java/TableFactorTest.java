@@ -12,6 +12,7 @@ import org.junit.Test;
 
 public class TableFactorTest {
 
+  public static final double EPSILON = 1e-6;
   private DiscreteVariable x = new DiscreteVariable(2, "X");
   private DiscreteVariable y = new DiscreteVariable(2, "Y");
   private DiscreteVariable z = new DiscreteVariable(3, "Z");
@@ -173,7 +174,54 @@ public class TableFactorTest {
     );
 
     // Koller page 107
-    assertThat(figureFourThreeA.product(figureFourThreeB).equals(figureFourThreeProduct, 1e-6)).isTrue();
-    assertThat(figureFourThreeB.product(figureFourThreeA).equals(figureFourThreeProduct, 1e-6)).isTrue();
+    assertThat(figureFourThreeA.product(figureFourThreeB).equals(figureFourThreeProduct, EPSILON)).isTrue();
+    assertThat(figureFourThreeB.product(figureFourThreeA).equals(figureFourThreeProduct, EPSILON)).isTrue();
+  }
+
+  @Test
+  public void reduceSingle() {
+    TableFactor expected = new TableFactor(
+        ImmutableMap.<Set<Assignment>, Double>builder()
+            .put(ImmutableSet.of(new Assignment(a, 1), new Assignment(b, 1), new Assignment(c, 1)), 0.25)
+            .put(ImmutableSet.of(new Assignment(a, 1), new Assignment(b, 2), new Assignment(c, 1)), 0.08)
+            .put(ImmutableSet.of(new Assignment(a, 2), new Assignment(b, 1), new Assignment(c, 1)), 0.05)
+            .put(ImmutableSet.of(new Assignment(a, 2), new Assignment(b, 2), new Assignment(c, 1)), 0.0)
+            .put(ImmutableSet.of(new Assignment(a, 3), new Assignment(b, 1), new Assignment(c, 1)), 0.15)
+            .put(ImmutableSet.of(new Assignment(a, 3), new Assignment(b, 2), new Assignment(c, 1)), 0.09)
+            .build()
+    );
+
+    final TableFactor reduced = figureFourThreeA.product(figureFourThreeB)
+        .reduce(new Assignment(c, 1));
+    assertThat(reduced.equals(expected, EPSILON)).isTrue();
+  }
+
+  @Test
+  public void reduceSet() {
+    TableFactor expectedReducedByCOne = new TableFactor(
+        ImmutableMap.<Set<Assignment>, Double>builder()
+            .put(ImmutableSet.of(new Assignment(a, 1), new Assignment(b, 1), new Assignment(c, 1)), 0.25)
+            .put(ImmutableSet.of(new Assignment(a, 1), new Assignment(b, 2), new Assignment(c, 1)), 0.08)
+            .put(ImmutableSet.of(new Assignment(a, 2), new Assignment(b, 1), new Assignment(c, 1)), 0.05)
+            .put(ImmutableSet.of(new Assignment(a, 2), new Assignment(b, 2), new Assignment(c, 1)), 0.0)
+            .put(ImmutableSet.of(new Assignment(a, 3), new Assignment(b, 1), new Assignment(c, 1)), 0.15)
+            .put(ImmutableSet.of(new Assignment(a, 3), new Assignment(b, 2), new Assignment(c, 1)), 0.09)
+            .build()
+    );
+
+    TableFactor expectedReducedByCOneAndBTwo = new TableFactor(
+        ImmutableMap.<Set<Assignment>, Double>builder()
+            .put(ImmutableSet.of(new Assignment(a, 1), new Assignment(b, 2), new Assignment(c, 1)), 0.08)
+            .put(ImmutableSet.of(new Assignment(a, 2), new Assignment(b, 2), new Assignment(c, 1)), 0.0)
+            .put(ImmutableSet.of(new Assignment(a, 3), new Assignment(b, 2), new Assignment(c, 1)), 0.09)
+            .build()
+    );
+
+    final TableFactor product = figureFourThreeA.product(figureFourThreeB);
+    assertThat(product.reduce(ImmutableSet.of())).isEqualTo(product);
+    assertThat(product
+        .reduce(ImmutableSet.of(new Assignment(c, 1))).equals(expectedReducedByCOne, EPSILON)).isTrue();
+
+    assertThat(product.reduce(ImmutableSet.of(new Assignment(c, 1), new Assignment(b, 2))).equals(expectedReducedByCOneAndBTwo, EPSILON)).isTrue();
   }
 }

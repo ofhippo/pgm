@@ -63,6 +63,32 @@ public class TableFactor implements Factor {
     return new TableFactor(results);
   }
 
+  public TableFactor reduce(Assignment assignment) {
+    Map<Set<Assignment>, Double> results = new HashMap<>();
+
+    for (Set<Assignment> assignments : table.keySet()) {
+      if (assignments.contains(assignment)) {
+        results.put(assignments, table.get(assignments));
+      }
+    }
+
+
+    return new TableFactor(results);
+  }
+
+  public TableFactor reduce(Set<Assignment> uAssignments) {
+    Set<RandomVariable> uPrime = uAssignments.stream().map(Assignment::getVariable).collect(Collectors.toSet());
+    Set<Assignment> uPrimeAssignments = uAssignments.stream().filter(assignment -> uPrime.contains(assignment.getVariable())).collect(
+        Collectors.toSet());
+
+    TableFactor results = this;
+    for (Assignment assignment : uPrimeAssignments) {
+      results = results.reduce(assignment);
+    }
+
+    return results;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
