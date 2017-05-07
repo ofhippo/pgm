@@ -1,4 +1,3 @@
-import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,7 +9,7 @@ public class VariableEliminationUtils {
     Set<TableFactor> factorsWithZ = factors.stream().filter(tableFactor -> tableFactor.scope.contains(z)).collect(
         Collectors.toSet());
 
-    Set<TableFactor> results = ImmutableSet.copyOf(factors);
+    Set<TableFactor> results = new HashSet<>(factors);
     results.removeAll(factorsWithZ);
     results.add(TableFactor.product(factorsWithZ).marginalizeOut(z));
     return results;
