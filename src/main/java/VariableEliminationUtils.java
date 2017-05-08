@@ -15,9 +15,9 @@ public class VariableEliminationUtils {
     return results;
   }
 
-  public static TableFactor sumProductVariableElimination(Set<TableFactor> factors, List<DiscreteVariable> variables) {
+  public static TableFactor sumProductVariableElimination(Set<TableFactor> factors, List<DiscreteVariable> variablesToEliminate) {
     Set<TableFactor> phi = new HashSet<>(factors);
-    for (DiscreteVariable variable : variables) {
+    for (DiscreteVariable variable : variablesToEliminate) {
       phi = sumProductEliminateVariable(phi, variable);
     }
     return TableFactor.product(phi);
