@@ -193,6 +193,26 @@ public class VariableEliminationUtilsTest {
         ImmutableList.of(g, s)).renormalize().evaluate(ImmutableSet.of(
         new Assignment(l, 1)
     ))).isCloseTo(0.513, Offset.offset(1e-3)); // Koller page 54, after we learn i=0, d=0
+
+    assertThat(VariableEliminationUtils.sumProductVariableElimination(
+        studentFactors,
+        ImmutableList.of(d, g, s, l)).renormalize().evaluate(ImmutableSet.of(
+        new Assignment(i, 1)
+    ))).isEqualTo(0.3);
+
+    assertThat(VariableEliminationUtils.conditionalProbVariableElimination(
+        studentFactors,
+        ImmutableSet.of(new Assignment(g, 3)),
+        ImmutableList.of(d, s, l)).renormalize().evaluate(ImmutableSet.of(
+        new Assignment(i, 1)
+    ))).isCloseTo(0.079, Offset.offset(1e-3));
+
+    assertThat(VariableEliminationUtils.conditionalProbVariableElimination(
+        studentFactors,
+        ImmutableSet.of(new Assignment(g, 3)),
+        ImmutableList.of(i, s, l)).renormalize().evaluate(ImmutableSet.of(
+        new Assignment(d, 1)
+    ))).isCloseTo(0.629, Offset.offset(1e-3));
   }
 
   private IterableAssert<Variable> assertVariableEliminationScope(ImmutableSet<TableFactor> factors,
