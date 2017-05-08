@@ -13,17 +13,17 @@ import org.junit.Test;
 
 public class VariableEliminationUtilsTest {
 
-  private DiscreteVariable x = new DiscreteVariable(2, "X");
-  private DiscreteVariable y = new DiscreteVariable(2, "Y");
-  private DiscreteVariable z = new DiscreteVariable(3, "Z");
-  private DiscreteVariable a = new DiscreteVariable(4, "A"); //lazy 1-index
-  private DiscreteVariable b = new DiscreteVariable(3, "B"); //lazy 1-index
-  private DiscreteVariable c = new DiscreteVariable(3, "C"); //lazy 1-index
-  private DiscreteVariable d = new DiscreteVariable(2, "D");
-  private DiscreteVariable i = new DiscreteVariable(2, "I");
-  private DiscreteVariable g = new DiscreteVariable(4, "G"); //lazy 1-index
-  private DiscreteVariable s = new DiscreteVariable(2, "S");
-  private DiscreteVariable l = new DiscreteVariable(2, "L");
+  private Variable x = new Variable(2, "X");
+  private Variable y = new Variable(2, "Y");
+  private Variable z = new Variable(3, "Z");
+  private Variable a = new Variable(4, "A"); //lazy 1-index
+  private Variable b = new Variable(3, "B"); //lazy 1-index
+  private Variable c = new Variable(3, "C"); //lazy 1-index
+  private Variable d = new Variable(2, "D");
+  private Variable i = new Variable(2, "I");
+  private Variable g = new Variable(4, "G"); //lazy 1-index
+  private Variable s = new Variable(2, "S");
+  private Variable l = new Variable(2, "L");
 
   private TableFactor xor;
   private TableFactor xPlusTenY;
@@ -179,11 +179,25 @@ public class VariableEliminationUtilsTest {
         ImmutableList.of(i, d, g, s)).evaluate(ImmutableSet.of(
         new Assignment(l, 1)
     ))).isCloseTo(0.502, Offset.offset(1e-3)); // Koller page 54
+
+    assertThat(VariableEliminationUtils.conditionalProbVariableElimination(
+        studentFactors,
+        ImmutableSet.of(new Assignment(i, 0)),
+        ImmutableList.of(d, g, s)).renormalize().evaluate(ImmutableSet.of(
+        new Assignment(l, 1)
+    ))).isCloseTo(0.389, Offset.offset(1e-3)); // Koller page 54, after we learn i=0
+
+    assertThat(VariableEliminationUtils.conditionalProbVariableElimination(
+        studentFactors,
+        ImmutableSet.of(new Assignment(i, 0), new Assignment(d, 0)),
+        ImmutableList.of(g, s)).renormalize().evaluate(ImmutableSet.of(
+        new Assignment(l, 1)
+    ))).isCloseTo(0.513, Offset.offset(1e-3)); // Koller page 54, after we learn i=0, d=0
   }
 
-  private IterableAssert<RandomVariable> assertVariableEliminationScope(ImmutableSet<TableFactor> factors,
-      ImmutableList<DiscreteVariable> variablesToEliminate,
-      ImmutableSet<DiscreteVariable> expectedScope) {
+  private IterableAssert<Variable> assertVariableEliminationScope(ImmutableSet<TableFactor> factors,
+      ImmutableList<Variable> variablesToEliminate,
+      ImmutableSet<Variable> expectedScope) {
     return assertThat(VariableEliminationUtils.sumProductVariableElimination(
         factors,
         variablesToEliminate).scope).isEqualTo(expectedScope);

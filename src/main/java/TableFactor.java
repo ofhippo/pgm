@@ -11,11 +11,11 @@ import java.util.stream.Collectors;
 public class TableFactor implements Factor {
 
   public final Map<Set<Assignment>, Double> table;
-  public Set<RandomVariable> scope = null;
+  public Set<Variable> scope = null;
 
   public TableFactor(Map<Set<Assignment>, Double> table) {
     for (Set<Assignment> fullAssignment : table.keySet()) {
-      final Set<RandomVariable> assignmentScope = fullAssignment.stream().map(
+      final Set<Variable> assignmentScope = fullAssignment.stream().map(
           Assignment::getVariable)
           .collect(Collectors.toSet());
 
@@ -33,7 +33,7 @@ public class TableFactor implements Factor {
     return table.get(assignment);
   }
 
-  public TableFactor marginalizeOut(DiscreteVariable variable) {
+  public TableFactor marginalizeOut(Variable variable) {
     Map<Set<Assignment>, Double> results = new HashMap<>();
     for (Set<Assignment> assignments : table.keySet()) {
       Set<Assignment> otherAssignments = new HashSet<>();
@@ -51,7 +51,7 @@ public class TableFactor implements Factor {
 
   public TableFactor product(TableFactor other) {
     Map<Set<Assignment>, Double> results = new HashMap<>();
-    Set<RandomVariable> variableIntersection = Sets.intersection(this.scope, other.scope);
+    Set<Variable> variableIntersection = Sets.intersection(this.scope, other.scope);
     for (Set<Assignment> myAssignments : this.table.keySet()) {
       final Set<Assignment> relevantAssignments = myAssignments.stream()
           .filter(assignment -> variableIntersection.contains(assignment.getVariable())).collect(
@@ -80,6 +80,7 @@ public class TableFactor implements Factor {
     }
   }
 
+  // Koller page 111
   public TableFactor reduce(Assignment assignment) {
     Map<Set<Assignment>, Double> results = new HashMap<>();
 
@@ -93,9 +94,9 @@ public class TableFactor implements Factor {
     return new TableFactor(results);
   }
 
+  // Koller page 111
   public TableFactor reduce(Set<Assignment> uAssignments) {
-    Set<RandomVariable> uPrime = uAssignments.stream().map(Assignment::getVariable).collect(Collectors.toSet());
-    Set<Assignment> uPrimeAssignments = uAssignments.stream().filter(assignment -> uPrime.contains(assignment.getVariable())).collect(
+    Set<Assignment> uPrimeAssignments = uAssignments.stream().filter(assignment -> this.scope.contains(assignment.getVariable())).collect(
         Collectors.toSet());
 
     TableFactor results = this;
@@ -104,6 +105,17 @@ public class TableFactor implements Factor {
     }
 
     return results;
+  }
+
+  public TableFactor renormalize() {
+    double z = table.values().stream().reduce(0d, (a, b) -> a + b);
+
+    Map<Set<Assignment>, Double> results = new HashMap<>();
+    for (Set<Assignment> assignments : table.keySet()) {
+        results.put(assignments, table.get(assignments) / z);
+    }
+
+    return new TableFactor(results);
   }
 
   @Override

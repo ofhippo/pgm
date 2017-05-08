@@ -13,12 +13,12 @@ import org.junit.Test;
 public class TableFactorTest {
 
   public static final double EPSILON = 1e-6;
-  private DiscreteVariable x = new DiscreteVariable(2, "X");
-  private DiscreteVariable y = new DiscreteVariable(2, "Y");
-  private DiscreteVariable z = new DiscreteVariable(3, "Z");
-  private DiscreteVariable a = new DiscreteVariable(4, "A"); //lazy 1-index
-  private DiscreteVariable b = new DiscreteVariable(3, "B"); //lazy 1-index
-  private DiscreteVariable c = new DiscreteVariable(3, "C"); //lazy 1-index
+  private Variable x = new Variable(2, "X");
+  private Variable y = new Variable(2, "Y");
+  private Variable z = new Variable(3, "Z");
+  private Variable a = new Variable(4, "A"); //lazy 1-index
+  private Variable b = new Variable(3, "B"); //lazy 1-index
+  private Variable c = new Variable(3, "C"); //lazy 1-index
   private TableFactor xor;
   private TableFactor xPlusTenY;
   private TableFactor multiplied;

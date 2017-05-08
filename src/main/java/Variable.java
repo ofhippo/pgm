@@ -1,11 +1,11 @@
 import java.util.HashSet;
 import java.util.Set;
 
-class DiscreteVariable implements RandomVariable {
+class Variable {
   private final Integer numValues;
   private final String name;
 
-  public DiscreteVariable(Integer numValues, String name) {
+  public Variable(Integer numValues, String name) {
     this.numValues = numValues;
     this.name = name;
   }
@@ -22,7 +22,6 @@ class DiscreteVariable implements RandomVariable {
     return results;
   }
 
-  @Override
   public String getName() {
     return name;
   }
@@ -36,7 +35,7 @@ class DiscreteVariable implements RandomVariable {
       return false;
     }
 
-    DiscreteVariable that = (DiscreteVariable) o;
+    Variable that = (Variable) o;
 
     if (!numValues.equals(that.numValues)) {
       return false;

@@ -1,16 +1,16 @@
 import com.google.common.base.Preconditions;
 
 public class Assignment {
-  private final RandomVariable variable;
+  private final Variable variable;
   private final int value;
 
-  public Assignment(RandomVariable variable, int value) {
+  public Assignment(Variable variable, int value) {
     Preconditions.checkArgument(variable.isValidAssignment(value), "invalid assignment: " + value + " to variable: " + variable.getName());
     this.variable = variable;
     this.value = value;
   }
 
-  public RandomVariable getVariable() {
+  public Variable getVariable() {
     return variable;
   }
 
