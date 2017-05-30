@@ -19,22 +19,16 @@ public class VariableEliminationUtilsTest {
   private Variable a = new Variable(4, "A"); //lazy 1-index
   private Variable b = new Variable(3, "B"); //lazy 1-index
   private Variable c = new Variable(3, "C"); //lazy 1-index
-  private Variable d = new Variable(2, "D");
-  private Variable i = new Variable(2, "I");
-  private Variable g = new Variable(4, "G"); //lazy 1-index
-  private Variable s = new Variable(2, "S");
-  private Variable l = new Variable(2, "L");
-
+  private Variable i;
+  private Variable d;
+  private Variable g;
+  private Variable l;
+  private Variable s;
   private TableFactor xor;
   private TableFactor xPlusTenY;
   private TableFactor zMinusX;
   private TableFactor figureFourThreeA;
   private TableFactor figureFourThreeB;
-  private TableFactor difficulty;
-  private TableFactor intelligence;
-  private TableFactor grade;
-  private TableFactor sat;
-  private TableFactor letter;
 
   @Before
   public void setup() {
@@ -89,57 +83,11 @@ public class VariableEliminationUtilsTest {
             .build()
     );
 
-    // Koller page 53
-    difficulty = new TableFactor(
-        ImmutableMap.<Set<Assignment>, Double>builder()
-            .put(ImmutableSet.of(new Assignment(d, 0)), 0.6)
-            .put(ImmutableSet.of(new Assignment(d, 1)), 0.4)
-            .build()
-    );
-
-    intelligence = new TableFactor(
-        ImmutableMap.<Set<Assignment>, Double>builder()
-            .put(ImmutableSet.of(new Assignment(i, 0)), 0.7)
-            .put(ImmutableSet.of(new Assignment(i, 1)), 0.3)
-            .build()
-    );
-
-    grade = new TableFactor(
-        ImmutableMap.<Set<Assignment>, Double>builder()
-            .put(ImmutableSet.of(new Assignment(i, 0), new Assignment(d, 0), new Assignment(g, 1)), 0.3)
-            .put(ImmutableSet.of(new Assignment(i, 0), new Assignment(d, 0), new Assignment(g, 2)), 0.4)
-            .put(ImmutableSet.of(new Assignment(i, 0), new Assignment(d, 0), new Assignment(g, 3)), 0.3)
-            .put(ImmutableSet.of(new Assignment(i, 0), new Assignment(d, 1), new Assignment(g, 1)), 0.05)
-            .put(ImmutableSet.of(new Assignment(i, 0), new Assignment(d, 1), new Assignment(g, 2)), 0.25)
-            .put(ImmutableSet.of(new Assignment(i, 0), new Assignment(d, 1), new Assignment(g, 3)), 0.7)
-            .put(ImmutableSet.of(new Assignment(i, 1), new Assignment(d, 0), new Assignment(g, 1)), 0.9)
-            .put(ImmutableSet.of(new Assignment(i, 1), new Assignment(d, 0), new Assignment(g, 2)), 0.08)
-            .put(ImmutableSet.of(new Assignment(i, 1), new Assignment(d, 0), new Assignment(g, 3)), 0.02)
-            .put(ImmutableSet.of(new Assignment(i, 1), new Assignment(d, 1), new Assignment(g, 1)), 0.5)
-            .put(ImmutableSet.of(new Assignment(i, 1), new Assignment(d, 1), new Assignment(g, 2)), 0.3)
-            .put(ImmutableSet.of(new Assignment(i, 1), new Assignment(d, 1), new Assignment(g, 3)), 0.2)
-            .build()
-    );
-
-    letter = new TableFactor(
-        ImmutableMap.<Set<Assignment>, Double>builder()
-            .put(ImmutableSet.of(new Assignment(l, 0), new Assignment(g, 1)), 0.1)
-            .put(ImmutableSet.of(new Assignment(l, 0), new Assignment(g, 2)), 0.4)
-            .put(ImmutableSet.of(new Assignment(l, 0), new Assignment(g, 3)), 0.99)
-            .put(ImmutableSet.of(new Assignment(l, 1), new Assignment(g, 1)), 0.9)
-            .put(ImmutableSet.of(new Assignment(l, 1), new Assignment(g, 2)), 0.6)
-            .put(ImmutableSet.of(new Assignment(l, 1), new Assignment(g, 3)), 0.01)
-            .build()
-    );
-
-    sat = new TableFactor(
-        ImmutableMap.<Set<Assignment>, Double>builder()
-            .put(ImmutableSet.of(new Assignment(i, 0), new Assignment(s, 0)), 0.95)
-            .put(ImmutableSet.of(new Assignment(i, 0), new Assignment(s, 1)), 0.05)
-            .put(ImmutableSet.of(new Assignment(i, 1), new Assignment(s, 0)), 0.2)
-            .put(ImmutableSet.of(new Assignment(i, 1), new Assignment(s, 1)), 0.8)
-            .build()
-    );
+    i = StudentExample.i;
+    d = StudentExample.d;
+    g = StudentExample.g;
+    l = StudentExample.l;
+    s = StudentExample.s;
   }
 
   @Test
@@ -163,7 +111,7 @@ public class VariableEliminationUtilsTest {
 
   @Test
   public void studentExample() {
-    Set<TableFactor> studentFactors = ImmutableSet.of(difficulty, grade, intelligence, sat, letter);
+    Set<TableFactor> studentFactors = StudentExample.studentFactors();
     assertThat(VariableEliminationUtils.sumProductVariableElimination(
         studentFactors,
         ImmutableList.of()).evaluate(ImmutableSet.of(
