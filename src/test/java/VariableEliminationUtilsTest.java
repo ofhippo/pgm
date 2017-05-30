@@ -111,7 +111,7 @@ public class VariableEliminationUtilsTest {
 
   @Test
   public void studentExample() {
-    Set<TableFactor> studentFactors = StudentExample.studentFactors();
+    Set<TableFactor> studentFactors = StudentExample.allFactors();
     assertThat(VariableEliminationUtils.sumProductVariableElimination(
         studentFactors,
         ImmutableList.of()).evaluate(ImmutableSet.of(

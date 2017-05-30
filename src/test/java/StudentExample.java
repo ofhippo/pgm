@@ -1,5 +1,7 @@
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.List;
 import java.util.Set;
 
 public class StudentExample {
@@ -61,8 +63,11 @@ public class StudentExample {
       .build()
     );
 
-  static Set<TableFactor> studentFactors() {
+  static Set<TableFactor> allFactors() {
     return ImmutableSet.of(difficulty, grade, intelligence, sat, letter);
   }
 
+  public static List<Variable> allVariables() {
+    return ImmutableList.of(d, g, i, s, l);
+  }
 }

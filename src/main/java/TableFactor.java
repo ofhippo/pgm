@@ -126,7 +126,7 @@ public class TableFactor implements Factor {
         return entry.getKey();
       }
     }
-    return null; // Should be unreachable
+    throw new RuntimeException("Should be unreachable");
   }
 
   public TableFactor renormalize() {

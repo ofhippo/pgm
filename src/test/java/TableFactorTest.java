@@ -233,7 +233,7 @@ public class TableFactorTest {
 
   @Test
   public void sample() {
-    final double numSamples = 1e5;
+    final double numSamples = 1e6;
     final Percentage acceptableDeviation = Percentage.withPercentage(1);
 
     TableFactor factor = new TableFactor(
