@@ -4,9 +4,12 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.assertj.core.data.Percentage;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -226,5 +229,82 @@ public class TableFactorTest {
         .reduce(ImmutableSet.of(new Assignment(c, 1))).equals(expectedReducedByCOne, EPSILON)).isTrue();
 
     assertThat(product.reduce(ImmutableSet.of(new Assignment(c, 1), new Assignment(b, 2))).equals(expectedReducedByCOneAndBTwo, EPSILON)).isTrue();
+  }
+
+  @Test
+  public void sample() {
+    final double numSamples = 1e5;
+    final Percentage acceptableDeviation = Percentage.withPercentage(1);
+
+    TableFactor factor = new TableFactor(
+        ImmutableMap.<Set<Assignment>, Double>builder()
+            .put(ImmutableSet.of(new Assignment(a, 0)), 0.1)
+            .put(ImmutableSet.of(new Assignment(a, 1)), 0.2)
+            .put(ImmutableSet.of(new Assignment(a, 2)), 0.3)
+            .put(ImmutableSet.of(new Assignment(a, 3)), 0.4)
+            .build()
+    );
+
+    List<Set<Assignment>> samples = drawSamples(factor, numSamples);
+
+    Map<Set<Assignment>, Integer> counts = getCountsFromSamples(samples);
+
+    assertThat(counts.get(ImmutableSet.of(new Assignment(a, 0))) / numSamples).isCloseTo(0.1, acceptableDeviation);
+    assertThat(counts.get(ImmutableSet.of(new Assignment(a, 1))) / numSamples).isCloseTo(0.2, acceptableDeviation);
+    assertThat(counts.get(ImmutableSet.of(new Assignment(a, 2))) / numSamples).isCloseTo(0.3, acceptableDeviation);
+    assertThat(counts.get(ImmutableSet.of(new Assignment(a, 3))) / numSamples).isCloseTo(0.4, acceptableDeviation);
+
+    TableFactor factor2 = new TableFactor(
+        ImmutableMap.<Set<Assignment>, Double>builder()
+            .put(ImmutableSet.of(new Assignment(a, 0), new Assignment(c, 1)), 10d)
+            .put(ImmutableSet.of(new Assignment(a, 1), new Assignment(c, 2)), 20d)
+            .put(ImmutableSet.of(new Assignment(a, 2), new Assignment(c, 1)), 30d)
+            .put(ImmutableSet.of(new Assignment(a, 3), new Assignment(c, 2)), 40d)
+            .build()
+    );
+
+    List<Set<Assignment>> samples2 = drawSamples(factor2, numSamples);
+    Map<Set<Assignment>, Integer> counts2 = getCountsFromSamples(samples2);
+
+    assertThat(counts2.get(ImmutableSet.of(new Assignment(a, 0), new Assignment(c, 1))) / numSamples).isCloseTo(0.1, acceptableDeviation);
+    assertThat(counts2.get(ImmutableSet.of(new Assignment(a, 1), new Assignment(c, 2))) / numSamples).isCloseTo(0.2, acceptableDeviation);
+    assertThat(counts2.get(ImmutableSet.of(new Assignment(a, 2), new Assignment(c, 1))) / numSamples).isCloseTo(0.3, acceptableDeviation);
+    assertThat(counts2.get(ImmutableSet.of(new Assignment(a, 3), new Assignment(c, 2))) / numSamples).isCloseTo(0.4, acceptableDeviation);
+
+    List<Set<Assignment>> samplesWithEvidences = drawSamplesWithEvidence(factor2, numSamples, ImmutableSet.of(new Assignment(c, 2)));
+    Map<Set<Assignment>, Integer> countsWithEvidence = getCountsFromSamples(samplesWithEvidences);
+    assertThat(countsWithEvidence.size()).isEqualTo(2);
+    assertThat(countsWithEvidence.get(ImmutableSet.of(new Assignment(a, 1), new Assignment(c, 2))) / numSamples).isCloseTo(0.333, acceptableDeviation);
+    assertThat(countsWithEvidence.get(ImmutableSet.of(new Assignment(a, 3), new Assignment(c, 2))) / numSamples).isCloseTo(0.666, acceptableDeviation);
+  }
+
+
+  private List<Set<Assignment>> drawSamplesWithEvidence(TableFactor factor, double numSamples, Set<Assignment> evidence) {
+    List<Set<Assignment>> samples = new ArrayList<>();
+    for (int i = 0; i < numSamples; i++) {
+      samples.add(factor.sample(evidence));
+    }
+    return samples;
+  }
+
+  private List<Set<Assignment>> drawSamples(TableFactor factor, double numSamples) {
+    List<Set<Assignment>> samples = new ArrayList<>();
+    for (int i = 0; i < numSamples; i++) {
+      samples.add(factor.sample());
+    }
+    return samples;
+  }
+
+  private Map<Set<Assignment>, Integer> getCountsFromSamples(List<Set<Assignment>> samples) {
+    Map<Set<Assignment>, Integer> counts = new HashMap<>();
+    for (Set<Assignment> sample : samples) {
+      final Integer countForSample = counts.get(sample);
+      if (countForSample == null) {
+        counts.put(sample, 1);
+      } else {
+        counts.put(sample, countForSample + 1);
+      }
+    }
+    return counts;
   }
 }

@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,6 +14,7 @@ public class TableFactor implements Factor {
 
   public final Map<Set<Assignment>, Double> table;
   public Set<Variable> scope = null;
+  public static Random random = new Random(123456);
 
   public TableFactor(Map<Set<Assignment>, Double> table) {
     for (Set<Assignment> fullAssignment : table.keySet()) {
@@ -105,6 +108,25 @@ public class TableFactor implements Factor {
     }
 
     return results;
+  }
+
+  public Set<Assignment> sample(Set<Assignment> evidence) {
+    return reduce(evidence).sample();
+  }
+
+  public Set<Assignment> sample() {
+    double sum = table.values().stream().mapToDouble(Double::valueOf).sum();
+    double target = random.nextDouble() * sum;
+
+    double seen = 0;
+    for (Entry<Set<Assignment>, Double> entry : table.entrySet()) {
+      seen += entry.getValue();
+
+      if (seen >= target) {
+        return entry.getKey();
+      }
+    }
+    return null; // Should be unreachable
   }
 
   public TableFactor renormalize() {
